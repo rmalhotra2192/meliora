@@ -1,6 +1,6 @@
-=======
+====================
 About the package
-=======
+====================
 
 **credit-tests** is a Python package that provides a set of statistical tests and tools to assess the performance of the credit risk models. The aim of the package is to provide all common tests used by today's modellers when developing, maintaining and validating their PD, LGD, EAD and prepayment models. All tests have been thoroughly tested and documented. Whenever possible, the definition of the test was retrieved from the authoritive source like EBA, ECB or Basel Committee.
 

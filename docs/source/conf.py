@@ -48,6 +48,10 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
+# The master toctree document.
+master_doc = 'index'
+
+
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -63,8 +67,30 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 
+
+# These paths are either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+html_css_files = [
+    'css/custom.css',
+]
+
+# -- Options for Texinfo output ----------------------------------------
+
+
+# Grouping the document tree into Texinfo files. List of tuples
+# (source start file, target name, title, author,
+#  dir menu entry, description, category)
+texinfo_documents = [
+    (master_doc, 'credit_risk_validation_tests',
+     'Credit Risk Documentation',
+     author,
+     'credit_risk_validation_tests',
+     'One line description of project.',
+     'Miscellaneous'),
+]
+
 # apidoc directories
-# apidoc_module_dir = '../../meliora'
+apidoc_module_dir = '../../meliora'
 apidoc_output_dir = 'meliora'
 apidoc_excluded_paths = ['tests']
 apidoc_separate_modules = True
