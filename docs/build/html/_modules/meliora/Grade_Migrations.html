@@ -6,6 +6,7 @@
   <title>meliora.Grade_Migrations &mdash; meliora 0.2 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -72,62 +73,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for meliora.Grade_Migrations</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span><span class="kn">import</span> <span class="nn">meliora.Grade_Migrations</span>
 
 
-<div class="viewcode-block" id="migration_matrix_statistics"><a class="viewcode-back" href="../../meliora/meliora.Grade_Migrations.html#meliora.Grade_Migrations.migration_matrix_statistics">[docs]</a><span class="k">def</span> <span class="nf">migration_matrix_statistics</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">initial_ratings_col</span><span class="p">,</span> <span class="n">final_ratings_col</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculates statistics that summarise the upgrades and downgrades of ratings</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    df: array-like, at least 2D</span>
-<span class="sd">        data</span>
-<span class="sd">    initial_ratings_col: string</span>
-<span class="sd">        name of column with observed LGD values</span>
-<span class="sd">    final_ratings_col: string</span>
-<span class="sd">        name of column with expected LGD values</span>
-
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    upper_mwb: float</span>
-<span class="sd">        upper matrix weighted bandwidth</span>
-<span class="sd">    lower_mwb: float</span>
-<span class="sd">        lower matrix weighted bandwidth</span>
-
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        &gt;&gt;&gt; res = migration_matrix_statistics(df=df, initial_ratings_col=&#39;ratings&#39;, final_ratings_col=&#39;ratings2&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; print(res)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">initial_ratings_col</span><span class="p">]</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">final_ratings_col</span><span class="p">]</span>
-    <span class="n">N_ij</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-    <span class="n">p_ij</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span>
-    <span class="n">K</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
-    <span class="n">mnormu</span> <span class="o">=</span> <span class="n">mnorml</span> <span class="o">=</span> <span class="n">upper_mwb</span> <span class="o">=</span> <span class="n">lower_mwb</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="p">):</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">:]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">b</span> <span class="o">=</span> <span class="n">N_ij</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">a</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="n">K</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">mnormu</span> <span class="o">+=</span> <span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">c</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="n">c</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="n">b</span> <span class="o">=</span> <span class="n">N_ij</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">a</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="n">K</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">mnorml</span> <span class="o">+=</span> <span class="n">a</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">c</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">upper_mwb</span> <span class="o">+=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="n">N_ij</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">upper_mwb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">mnormu</span><span class="p">)</span><span class="o">*</span><span class="n">upper_mwb</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">lower_mwb</span> <span class="o">+=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="n">N_ij</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">lower_mwb</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">mnorml</span><span class="p">)</span><span class="o">*</span><span class="n">lower_mwb</span>
-    <span class="k">return</span> <span class="n">upper_mwb</span><span class="p">,</span> <span class="n">lower_mwb</span></div>
+<div class="viewcode-block" id="test_Grade_Migrations"><a class="viewcode-back" href="../../meliora/meliora.Grade_Migrations.html#meliora.Grade_Migrations.test_Grade_Migrations">[docs]</a><span class="k">def</span> <span class="nf">test_Grade_Migrations</span><span class="p">():</span>
+    <span class="k">assert</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">3</span></div>
 </pre></div>
 
            </div>

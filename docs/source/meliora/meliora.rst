@@ -1,5 +1,8 @@
-Validation tests
-=================
+meliora package
+===============
+
+Submodules
+----------
 
 .. toctree::
    :maxdepth: 4
@@ -35,3 +38,10 @@ Validation tests
    meliora.Spiegelhalter_Test
    meliora.Traffic_Lights_Approach
 
+Module contents
+---------------
+
+.. automodule:: meliora
+   :members:
+   :undoc-members:
+   :show-inheritance:
