@@ -36,8 +36,8 @@ release = '0.2'
 # ones.
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
-            #   'myst_nb',
-            #   'sphinxcontrib.apidoc',
+              'myst_nb',
+              'sphinxcontrib.apidoc',
               'sphinx.ext.napoleon']
 
 # Add any paths that contain templates here, relative to this directory.
@@ -91,7 +91,7 @@ texinfo_documents = [
 ]
 
 # apidoc directories
-apidoc_module_dir = '../../meliora'
+# apidoc_module_dir = '../../meliora'
 apidoc_output_dir = 'meliora'
 apidoc_excluded_paths = ['tests']
 apidoc_separate_modules = True
