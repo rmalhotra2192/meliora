@@ -81,7 +81,8 @@ html_css_files = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'credit_risk_validation_tests',
+    (master_doc, 
+    'credit_risk_validation_tests',
      'Credit Risk Documentation',
      author,
      'credit_risk_validation_tests',
