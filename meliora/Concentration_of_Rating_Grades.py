@@ -30,6 +30,7 @@ def rating_concentration(initial_ratings, final_ratings):
 
     Warning
     -------
+    There might be a problem
 
     See Also
     --------
@@ -61,13 +62,11 @@ def rating_concentration(initial_ratings, final_ratings):
 
     References
     -----------
-    
     For more information see "Instructions for reporting the validation results
     of internal models.", ECB, February 2019
 
     Examples
     ----------
-    .. code-block:: python
 
         >>> res = migration_matrix_statistics(df=df, initial_ratings_col='ratings', final_ratings_col='ratings2')
         >>> print(res)
