@@ -16,8 +16,8 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../meliora'))
-
+sys.path.insert(0, os.path.abspath('../..'))
+import meliora
 
 # -- Project information -----------------------------------------------------
 
@@ -36,7 +36,7 @@ release = '0.2'
 # ones.
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.viewcode',
-              'myst_nb',
+            #   'myst_nb',
               'sphinxcontrib.apidoc',
               'sphinx.ext.napoleon']
 

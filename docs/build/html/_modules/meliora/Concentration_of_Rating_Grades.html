@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>meliora.Concentration_of_Rating_Grades &mdash; meliora 0.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> meliora
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">About the package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tests.html">List of tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Functions and classes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../meliora/meliora.html">meliora package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">meliora</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>meliora.Concentration_of_Rating_Grades</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for meliora.Concentration_of_Rating_Grades</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="rating_concentration"><a class="viewcode-back" href="../../meliora/meliora.Concentration_of_Rating_Grades.html#meliora.Concentration_of_Rating_Grades.rating_concentration">[docs]</a><span class="k">def</span> <span class="nf">rating_concentration</span><span class="p">(</span><span class="n">initial_ratings</span><span class="p">,</span> <span class="n">final_ratings</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Assess whether dispersion of the PD rating grades is adequate</span>
+
+<span class="sd">    The objective of this validation tool is to assess whether rating grades have</span>
+<span class="sd">    meaningful dispersion - i.e. to benchmark the current concentration level against the</span>
+<span class="sd">    concentration level measured at the time of the initial validation39 in the course of</span>
+<span class="sd">    the model&#39;s development. The level of concentration is calculated both in terms of the</span>
+<span class="sd">    percentage of customers and in terms of exposure.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    initial_ratings_col: Pandas series</span>
+<span class="sd">        series with initial ratings</span>
+<span class="sd">    final_ratings_col: Pandas series</span>
+<span class="sd">        series with final ratings</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    H_init: float</span>
+<span class="sd">        Initial Herfindahl index</span>
+<span class="sd">    H_curr: float</span>
+<span class="sd">        Final Herfindahl index</span>
+<span class="sd">    p_value: float</span>
+<span class="sd">        p-value of the test</span>
+
+
+<span class="sd">    Warning</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    Index.unique : Return unique values from an Index.</span>
+<span class="sd">    Series.unique : Return unique values of Series object.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----------</span>
+
+<span class="sd">    The objective of this validation tool is to assess whether rating grades have</span>
+<span class="sd">    meaningful dispersion - i.e. to benchmark the current concentration level against the</span>
+<span class="sd">    concentration level measured at the time of the initial validation39 in the course of</span>
+<span class="sd">    the model&#39;s development. The level of concentration is calculated both in terms of the</span>
+<span class="sd">    percentage of customers and in terms of exposure.</span>
+
+<span class="sd">    Comparison of the Herfindahl Index at the beginning of the relevant observation</span>
+<span class="sd">    period and the Herfindahl Index at the time of the initial validation during</span>
+<span class="sd">    development via hypothesis testing based on a normal approximation assuming a</span>
+<span class="sd">    deterministic Herfindahl Index at the time of the model&#39;s development. The null</span>
+<span class="sd">    hypothesis of the test40 is that the current Herfindahl Index is lower than the</span>
+<span class="sd">    Herfindahl Index at the time of development.</span>
+
+<span class="sd">    The test should be performed at number-weighted and exposure-weighted level.</span>
+
+
+<span class="sd">    Observations are assumed to be independent.</span>
+<span class="sd">    This function can be used for both performing and non-performing LGDs.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    -----------</span>
+<span class="sd">    </span>
+<span class="sd">    For more information see &quot;Instructions for reporting the validation results</span>
+<span class="sd">    of internal models.&quot;, ECB, February 2019</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        &gt;&gt;&gt; res = migration_matrix_statistics(df=df, initial_ratings_col=&#39;ratings&#39;, final_ratings_col=&#39;ratings2&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; print(res)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check the data for missing values</span>
+    <span class="k">if</span> <span class="n">initial_ratings</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="n">final_ratings</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Missing values detected&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_ratings</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_ratings</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The length of the rating series does not match&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Create a crosstab for initial and final ratings</span>
+    <span class="n">N_init</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">initial_ratings</span><span class="p">,</span> <span class="n">initial_ratings</span><span class="p">)</span>
+    <span class="n">N_curr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">final_ratings</span><span class="p">,</span> <span class="n">final_ratings</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the coefficient of variation</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">initial_ratings</span><span class="p">))</span>
+    <span class="n">R_init</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">N_init</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">N_init</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">R_curr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">N_curr</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">N_curr</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+    <span class="n">CV_init</span> <span class="o">=</span> <span class="n">CV_curr</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">CV_init</span> <span class="o">+=</span> <span class="p">(</span><span class="n">R_init</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">CV_init</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">K</span> <span class="o">*</span> <span class="n">CV_init</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">CV_curr</span> <span class="o">+=</span> <span class="p">(</span><span class="n">R_curr</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">K</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">CV_curr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">K</span> <span class="o">*</span> <span class="n">CV_curr</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the Herfindahl Index</span>
+    <span class="n">HI_init</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">CV_init</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">K</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+    <span class="n">HI_curr</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">((</span><span class="n">CV_curr</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">K</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the p-value</span>
+    <span class="n">p1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">K</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">CV_curr</span> <span class="o">-</span> <span class="n">CV_init</span><span class="p">)</span>
+    <span class="n">p2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">CV_curr</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">+</span> <span class="n">CV_curr</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">p_value</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">p1</span> <span class="o">/</span> <span class="n">p2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">HI_curr</span><span class="p">,</span> <span class="n">HI_init</span><span class="p">,</span> <span class="n">p_value</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Anton Treialt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

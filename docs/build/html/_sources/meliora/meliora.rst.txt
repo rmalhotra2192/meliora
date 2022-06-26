@@ -20,7 +20,7 @@ Validation tests
    meliora.Jeffreys_Test
    meliora.Kendall_tau
    meliora.Kolmogorov_Smirnov_test
-   meliora.Kullback_Leibler distance
+   meliora.Kullback_Leibler_distance
    meliora.LGD_t_test
    meliora.Loss_Capture_Ratio
    meliora.Loss_Shortfall
@@ -34,3 +34,4 @@ Validation tests
    meliora.Spearman_Rank_Correlation
    meliora.Spiegelhalter_Test
    meliora.Traffic_Lights_Approach
+

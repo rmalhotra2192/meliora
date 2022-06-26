@@ -65,7 +65,7 @@ def rating_concentration(initial_ratings, final_ratings):
     For more information see "Instructions for reporting the validation results
     of internal models.", ECB, February 2019
 
-    ExamplesXX
+    Examples
     ----------
     .. code-block:: python
 

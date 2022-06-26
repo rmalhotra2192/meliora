@@ -7,8 +7,6 @@
   <title>Coefficient of Concordance &mdash; meliora 0.2 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/mystnb.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/togglebutton.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -18,11 +16,6 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
-        <script>let toggleHintShow = 'Click to show';</script>
-        <script>let toggleHintHide = 'Click to hide';</script>
-        <script>let toggleOpenOnPrint = 'true';</script>
-        <script src="../_static/togglebutton.js"></script>
-        <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -71,7 +64,7 @@
 <li class="toctree-l2"><a class="reference internal" href="meliora.Jeffreys_Test.html">Jeffreys Test</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meliora.Kendall_tau.html">Kendall tau</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meliora.Kolmogorov_Smirnov_test.html">Kolmogorov Smirnov test</a></li>
-<li class="toctree-l2"><a class="reference internal" href="meliora.Kullback_Leibler%20distance.html">Kullback Leibler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="meliora.Kullback_Leibler_distance.html">Kullback Leibler distance</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meliora.LGD_t_test.html">LGD t test</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meliora.Loss_Capture_Ratio.html">Loss Capture Ratio</a></li>
 <li class="toctree-l2"><a class="reference internal" href="meliora.Loss_Shortfall.html">Loss Shortfall</a></li>
@@ -114,8 +107,38 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="coefficient-of-concordance">
-<h1>Coefficient of Concordance<a class="headerlink" href="#coefficient-of-concordance" title="Permalink to this heading"></a></h1>
+  <section id="module-meliora.Coefficient_of_Concordance">
+<span id="coefficient-of-concordance"></span><h1>Coefficient of Concordance<a class="headerlink" href="#module-meliora.Coefficient_of_Concordance" title="Permalink to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="meliora.Coefficient_of_Concordance.migration_matrix_stability">
+<span class="sig-prename descclassname"><span class="pre">meliora.Coefficient_of_Concordance.</span></span><span class="sig-name descname"><span class="pre">migration_matrix_stability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_ratings_col</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_ratings_col</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/meliora/Coefficient_of_Concordance.html#migration_matrix_stability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#meliora.Coefficient_of_Concordance.migration_matrix_stability" title="Permalink to this definition"></a></dt>
+<dd><p>z-tests to verify stability of transition matrices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>array-like</em><em>, </em><em>at least 2D</em>) – data</p></li>
+<li><p><strong>initial_ratings_col</strong> (<em>string</em>) – name of column with initial ratings values</p></li>
+<li><p><strong>final_ratings_col</strong> (<em>string</em>) – name of column with final ratings values</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>z_df</strong> (<em>array-like</em>) – z statistic for each ratings pair</p></li>
+<li><p><strong>phi_df</strong> (<em>array-like</em>) – p-values for each ratings pair</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The Null hypothesis is that p_ij &gt;= p_ij-1 or p_ij-1 &gt;= p_ij
+depending on whether the (ij) entry is below or above main diagonal</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">migration_matrix_stability</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">initial_ratings_col</span><span class="o">=</span><span class="s1">&#39;ratings&#39;</span><span class="p">,</span> <span class="n">final_ratings_col</span><span class="o">=</span><span class="s1">&#39;ratings2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </section>
 
 
