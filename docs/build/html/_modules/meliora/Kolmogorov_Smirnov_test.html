@@ -73,83 +73,130 @@
            <div itemprop="articleBody">
              
   <h1>Source code for meliora.Kolmogorov_Smirnov_test</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+<span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
 
 
-<div class="viewcode-block" id="migration_matrix_stability"><a class="viewcode-back" href="../../meliora/meliora.Kolmogorov_Smirnov_test.html#meliora.Kolmogorov_Smirnov_test.migration_matrix_stability">[docs]</a><span class="k">def</span> <span class="nf">migration_matrix_stability</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">initial_ratings_col</span><span class="p">,</span> <span class="n">final_ratings_col</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;z-tests to verify stability of transition matrices</span>
+<div class="viewcode-block" id="ks"><a class="viewcode-back" href="../../meliora/meliora.Kolmogorov_Smirnov_test.html#meliora.Kolmogorov_Smirnov_test.ks">[docs]</a><span class="k">def</span> <span class="nf">ks</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">cdf</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(),</span> <span class="n">N</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    KS is the maximum distance between two population distributions. </span>
+
+<span class="sd">    This statistic helps discriminate default accounts from non-default </span>
+<span class="sd">    accounts. It is also used to determine the best cutoff in application </span>
+<span class="sd">    scoring. The best cutoff maximizes KS, which becomes the best </span>
+<span class="sd">    differentiator between the two populations. The KS value can range </span>
+<span class="sd">    between 0 and 1, where 1 implies that the model is perfectly accurate </span>
+<span class="sd">    in predicting default accounts or separating the two populations. </span>
+<span class="sd">    A higher KS denotes a better model.</span>
+
+<span class="sd">    Performs the (one-sample or two-sample) Kolmogorov-Smirnov test for</span>
+<span class="sd">    goodness of fit.</span>
+<span class="sd">    The one-sample test compares the underlying distribution F(x) of a sample</span>
+<span class="sd">    against a given distribution G(x). The two-sample test compares the</span>
+<span class="sd">    underlying distributions of two independent samples. Both tests are valid</span>
+<span class="sd">    only for continuous distributions.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    df: array-like, at least 2D</span>
-<span class="sd">        data</span>
-<span class="sd">    initial_ratings_col: string</span>
-<span class="sd">        name of column with initial ratings values</span>
-<span class="sd">    final_ratings_col: string</span>
-<span class="sd">        name of column with final ratings values</span>
+<span class="sd">    rvs : str, array_like, or callable</span>
+<span class="sd">        If an array, it should be a 1-D array of observations of random</span>
+<span class="sd">        variables.</span>
+<span class="sd">        If a callable, it should be a function to generate random variables;</span>
+<span class="sd">        it is required to have a keyword argument &#39;size&#39;.</span>
+<span class="sd">        If a string, it should be the name of a distribution in &#39;scipy.stats&#39;,</span>
+<span class="sd">        which will be used to generate random variables.</span>
+<span class="sd">    cdf : str, array_like or callable</span>
+<span class="sd">        If array_like, it should be a 1-D array of observations of random</span>
+<span class="sd">        variables, and the two-sample test is performed</span>
+<span class="sd">        (and rvs must be array_like).</span>
+<span class="sd">        If a callable, that callable is used to calculate the cdf.</span>
+<span class="sd">        If a string, it should be the name of a distribution in &#39;scipy.stats&#39;,</span>
+<span class="sd">        which will be used as the cdf function.</span>
+<span class="sd">    args : tuple, sequence, optional</span>
+<span class="sd">            Distribution parameters, used if &#39;rvs&#39; or &#39;cdf&#39; are strings or</span>
+<span class="sd">            callables.</span>
+
+<span class="sd">    N : int, optional</span>
+<span class="sd">        Sample size if &#39;rvs&#39; is string or callable.  Default is 20.</span>
+<span class="sd">    alternative : {&#39;two-sided&#39;, &#39;less&#39;, &#39;greater&#39;}, optional</span>
+<span class="sd">        Defines the null and alternative hypotheses. Default is &#39;two-sided&#39;.</span>
+<span class="sd">        Please see explanations in the Notes below.</span>
+<span class="sd">    mode : {&#39;auto&#39;, &#39;exact&#39;, &#39;approx&#39;, &#39;asymp&#39;}, optional</span>
+<span class="sd">        Defines the distribution used for calculating the p-value.</span>
+<span class="sd">        The following options are available (default is &#39;auto&#39;):</span>
+<span class="sd">          * &#39;auto&#39; : selects one of the other options.</span>
+<span class="sd">          * &#39;exact&#39; : uses the exact distribution of test statistic.</span>
+<span class="sd">          * &#39;approx&#39; : approximates the two-sided probability with twice the</span>
+<span class="sd">            one-sided probability</span>
+<span class="sd">          * &#39;asymp&#39;: uses asymptotic distribution of test statistic</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    z_df: array-like</span>
-<span class="sd">        z statistic for each ratings pair</span>
-<span class="sd">    phi_df: array-like</span>
-<span class="sd">        p-values for each ratings pair</span>
+<span class="sd">    statistic : float</span>
+<span class="sd">                KS test statistic, either D, D+ or D-.</span>
+<span class="sd">    pvalue :  float</span>
+<span class="sd">                One-tailed or two-tailed p-value.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    ks_2samp</span>
 
 
 <span class="sd">    Notes</span>
-<span class="sd">    -----------</span>
-<span class="sd">    The Null hypothesis is that p_ij &gt;= p_ij-1 or p_ij-1 &gt;= p_ij</span>
-<span class="sd">    depending on whether the (ij) entry is below or above main diagonal</span>
+<span class="sd">    -----</span>
+<span class="sd">    There are three options for the null and corresponding alternative</span>
+<span class="sd">    hypothesis that can be selected using the `alternative` parameter.</span>
 
+<span class="sd">    - `two-sided`: The null hypothesis is that the two distributions are</span>
+<span class="sd">      identical, F(x)=G(x) for all x; the alternative is that they are not</span>
+<span class="sd">      identical.</span>
+<span class="sd">    - `less`: The null hypothesis is that F(x) &gt;= G(x) for all x; the</span>
+<span class="sd">      alternative is that F(x) &lt; G(x) for at least one x.</span>
+<span class="sd">    - `greater`: The null hypothesis is that F(x) &lt;= G(x) for all x; the</span>
+<span class="sd">      alternative is that F(x) &gt; G(x) for at least one x.</span>
+<span class="sd">    Note that the alternative hypotheses describe the *CDFs* of the</span>
+<span class="sd">    underlying distributions, not the observed values. For example,</span>
+<span class="sd">    suppose x1 ~ F and x2 ~ G. If F(x) &gt; G(x) for all x, the values in</span>
+<span class="sd">    x1 tend to be less than those in x2.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    .. code-block:: python</span>
+<span class="sd">    &gt;&gt;&gt; from scipy import stats</span>
+<span class="sd">    &gt;&gt;&gt; rng = np.random.default_rng()</span>
+<span class="sd">    &gt;&gt;&gt; x = np.linspace(-15, 15, 9)</span>
+<span class="sd">    &gt;&gt;&gt; stats.kstest(x, &#39;norm&#39;)</span>
+<span class="sd">    KstestResult(statistic=0.444356027159..., pvalue=0.038850140086...)</span>
 
-<span class="sd">        &gt;&gt;&gt; res = migration_matrix_stability(df=df, initial_ratings_col=&#39;ratings&#39;, final_ratings_col=&#39;ratings2&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; print(res)</span>
+<span class="sd">    &gt;&gt;&gt; stats.kstest(stats.norm.rvs(size=100, random_state=rng), stats.norm.cdf)</span>
+<span class="sd">    KstestResult(statistic=0.165471391799..., pvalue=0.007331283245...)</span>
+
+<span class="sd">    &gt;&gt;&gt; x = stats.norm.rvs(loc=0.2, size=100, random_state=rng)</span>
+<span class="sd">    &gt;&gt;&gt; stats.kstest(x, &#39;norm&#39;, alternative=&#39;less&#39;)</span>
+<span class="sd">    KstestResult(statistic=0.1002033514..., pvalue=0.1255446444...)</span>
+<span class="sd">    Reject null hypothesis in favor of alternative hypothesis: less</span>
+
+<span class="sd">    &gt;&gt;&gt; stats.kstest(x, &#39;norm&#39;, alternative=&#39;greater&#39;)</span>
+<span class="sd">    KstestResult(statistic=0.018749806388..., pvalue=0.920581859791...)</span>
+<span class="sd">    Don&#39;t reject null hypothesis in favor of alternative hypothesis: greater</span>
+
+<span class="sd">    &gt;&gt;&gt; stats.kstest(x, &#39;norm&#39;)</span>
+<span class="sd">    KstestResult(statistic=0.100203351482..., pvalue=0.250616879765...)</span>
+<span class="sd">    *Testing t distributed random variables against normal distribution*</span>
+<span class="sd">    With 100 degrees of freedom the t distribution looks close to the normal</span>
+<span class="sd">    distribution, and the K-S test does not reject the hypothesis that the</span>
+<span class="sd">    sample came from the normal distribution:</span>
+
+<span class="sd">    &gt;&gt;&gt; stats.kstest(stats.t.rvs(100, size=100, random_state=rng), &#39;norm&#39;)</span>
+<span class="sd">    KstestResult(statistic=0.064273776544..., pvalue=0.778737758305...)</span>
+<span class="sd">    With 3 degrees of freedom the t distribution looks sufficiently different</span>
+<span class="sd">    from the normal distribution, that we can reject the hypothesis that the</span>
+<span class="sd">    sample came from the normal distribution at the 10% level:</span>
+
+<span class="sd">    &gt;&gt;&gt; stats.kstest(stats.t.rvs(3, size=100, random_state=rng), &#39;norm&#39;)</span>
+<span class="sd">    KstestResult(statistic=0.128678487493..., pvalue=0.066569081515...)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">initial_ratings_col</span><span class="p">]</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">final_ratings_col</span><span class="p">]</span>
-    <span class="n">N_ij</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-    <span class="n">p_ij</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span>
-    <span class="n">K</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
-    <span class="n">z_df</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
 
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">j</span><span class="p">:</span>
-                <span class="n">Ni</span> <span class="o">=</span> <span class="n">N_ij</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-                <span class="n">num</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">den_a</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_b</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_c</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">Ni</span>
-
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">den_a</span> <span class="o">+</span> <span class="n">den_b</span> <span class="o">+</span> <span class="n">den_c</span><span class="p">)</span>
-
-            <span class="k">elif</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span>
-                <span class="n">Ni</span> <span class="o">=</span> <span class="n">N_ij</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-                <span class="n">num</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">den_a</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_b</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_c</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">Ni</span>
-
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">den_a</span> <span class="o">+</span> <span class="n">den_b</span> <span class="o">+</span> <span class="n">den_c</span><span class="p">)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-            <span class="n">z_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_ij</span>
-    <span class="n">phi_df</span> <span class="o">=</span> <span class="n">z_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
-    <span class="k">return</span> <span class="n">z_df</span><span class="p">,</span> <span class="n">phi_df</span></div>
+    <span class="k">return</span> <span class="n">stats</span><span class="o">.</span><span class="n">kstest</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">cdf</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(),</span> <span class="n">N</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s1">&#39;two-sided&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

@@ -73,83 +73,68 @@
            <div itemprop="articleBody">
              
   <h1>Source code for meliora.Accuracy_Ratio</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+<span></span><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">accuracy_score</span>
 
 
-<div class="viewcode-block" id="migration_matrix_stability"><a class="viewcode-back" href="../../meliora/meliora.Accuracy_Ratio.html#meliora.Accuracy_Ratio.migration_matrix_stability">[docs]</a><span class="k">def</span> <span class="nf">migration_matrix_stability</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">initial_ratings_col</span><span class="p">,</span> <span class="n">final_ratings_col</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;z-tests to verify stability of transition matrices</span>
+<div class="viewcode-block" id="accuracy_ratio"><a class="viewcode-back" href="../../meliora/meliora.Accuracy_Ratio.html#meliora.Accuracy_Ratio.accuracy_ratio">[docs]</a><span class="k">def</span> <span class="nf">accuracy_ratio</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">pred</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Accuracy classification score.</span>
+
+<span class="sd">    In multilabel classification, this function computes subset accuracy:</span>
+<span class="sd">    the set of labels predicted for a sample must *exactly* match the</span>
+<span class="sd">    corresponding set of labels in y_true.</span>
+
+<span class="sd">    **This is a copy-paste from sklearn package. Contact them to ask </span>
+<span class="sd">    for referencing rules.**</span>
+
+<span class="sd">    https://github.com/scikit-learn/scikit-learn/blob/80598905e/sklearn/metrics/_classification.py</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    df: array-like, at least 2D</span>
-<span class="sd">        data</span>
-<span class="sd">    initial_ratings_col: string</span>
-<span class="sd">        name of column with initial ratings values</span>
-<span class="sd">    final_ratings_col: string</span>
-<span class="sd">        name of column with final ratings values</span>
+<span class="sd">    y_true : 1d array-like, or label indicator array / sparse matrix</span>
+<span class="sd">        Ground truth (correct) labels.</span>
+<span class="sd">    y_pred : 1d array-like, or label indicator array / sparse matrix</span>
+<span class="sd">        Predicted labels, as returned by a classifier.</span>
+<span class="sd">    normalize : bool, default=True</span>
+<span class="sd">        If ``False``, return the number of correctly classified samples.</span>
+<span class="sd">        Otherwise, return the fraction of correctly classified samples.</span>
+<span class="sd">    sample_weight : array-like of shape (n_samples,), default=None</span>
+<span class="sd">        Sample weights.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    z_df: array-like</span>
-<span class="sd">        z statistic for each ratings pair</span>
-<span class="sd">    phi_df: array-like</span>
-<span class="sd">        p-values for each ratings pair</span>
+<span class="sd">    score : float</span>
+<span class="sd">        If ``normalize == True``, return the fraction of correctly</span>
+<span class="sd">        classified samples (float), else returns the number of correctly</span>
+<span class="sd">        classified samples (int).</span>
+<span class="sd">        The best performance is 1 with ``normalize == True`` and the number</span>
+<span class="sd">        of samples with ``normalize == False``.</span>
 
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    balanced_accuracy_score : Compute the balanced accuracy to deal with</span>
+<span class="sd">        imbalanced datasets.</span>
 
 <span class="sd">    Notes</span>
-<span class="sd">    -----------</span>
-<span class="sd">    The Null hypothesis is that p_ij &gt;= p_ij-1 or p_ij-1 &gt;= p_ij</span>
-<span class="sd">    depending on whether the (ij) entry is below or above main diagonal</span>
-
+<span class="sd">    -----</span>
+<span class="sd">    In binary classification, this function is equal to the `jaccard_score`</span>
+<span class="sd">    function.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        &gt;&gt;&gt; res = migration_matrix_stability(df=df, initial_ratings_col=&#39;ratings&#39;, final_ratings_col=&#39;ratings2&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; print(res)</span>
+<span class="sd">    &gt;&gt;&gt; from sklearn.metrics import accuracy_score</span>
+<span class="sd">    &gt;&gt;&gt; y_pred = [0, 2, 1, 3]</span>
+<span class="sd">    &gt;&gt;&gt; y_true = [0, 1, 2, 3]</span>
+<span class="sd">    &gt;&gt;&gt; accuracy_score(y_true, y_pred)</span>
+<span class="sd">    0.5</span>
+<span class="sd">    &gt;&gt;&gt; accuracy_score(y_true, y_pred, normalize=False)</span>
+<span class="sd">    2</span>
+<span class="sd">    In the multilabel case with binary label indicators:</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; accuracy_score(np.array([[0, 1], [1, 1]]), np.ones((2, 2)))</span>
+<span class="sd">    0.5</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">initial_ratings_col</span><span class="p">]</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">final_ratings_col</span><span class="p">]</span>
-    <span class="n">N_ij</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-    <span class="n">p_ij</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span>
-    <span class="n">K</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
-    <span class="n">z_df</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
 
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">j</span><span class="p">:</span>
-                <span class="n">Ni</span> <span class="o">=</span> <span class="n">N_ij</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-                <span class="n">num</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">den_a</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_b</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_c</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">Ni</span>
-
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">den_a</span> <span class="o">+</span> <span class="n">den_b</span> <span class="o">+</span> <span class="n">den_c</span><span class="p">)</span>
-
-            <span class="k">elif</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span>
-                <span class="n">Ni</span> <span class="o">=</span> <span class="n">N_ij</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-                <span class="n">num</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">den_a</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_b</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_c</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">Ni</span>
-
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">den_a</span> <span class="o">+</span> <span class="n">den_b</span> <span class="o">+</span> <span class="n">den_c</span><span class="p">)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-            <span class="n">z_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_ij</span>
-    <span class="n">phi_df</span> <span class="o">=</span> <span class="n">z_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
-    <span class="k">return</span> <span class="n">z_df</span><span class="p">,</span> <span class="n">phi_df</span></div>
+    <span class="k">return</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

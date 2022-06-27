@@ -1,0 +1,7 @@
+meliora
+=======
+
+.. toctree::
+   :maxdepth: 4
+
+   meliora

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>meliora.CIER &mdash; meliora 0.2 documentation</title>
+  <title>meliora.Binomial_test &mdash; meliora 0.2 documentation</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
@@ -63,7 +63,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>meliora.CIER</li>
+      <li>meliora.Binomial_test</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -72,13 +72,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for meliora.CIER</h1><div class="highlight"><pre>
+  <h1>Source code for meliora.Binomial_test</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">binom</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<div class="viewcode-block" id="cier"><a class="viewcode-back" href="../../meliora/meliora.CIER.html#meliora.CIER.cier">[docs]</a><span class="k">def</span> <span class="nf">cier</span><span class="p">(</span><span class="n">ratings</span><span class="p">,</span> <span class="n">default_flag</span><span class="p">,</span> <span class="n">prob_default</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
+<div class="viewcode-block" id="binomial_test"><a class="viewcode-back" href="../../meliora/meliora.Binomial_test.html#meliora.Binomial_test.binomial_test">[docs]</a><span class="k">def</span> <span class="nf">binomial_test</span><span class="p">(</span><span class="n">ratings</span><span class="p">,</span> <span class="n">default_flag</span><span class="p">,</span> <span class="n">prob_default</span><span class="p">,</span> <span class="n">alpha</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Binomial Test evaluates whether the PD of a pool is correctly estimated.</span>
 

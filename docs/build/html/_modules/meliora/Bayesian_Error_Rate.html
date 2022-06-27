@@ -73,83 +73,53 @@
            <div itemprop="articleBody">
              
   <h1>Source code for meliora.Bayesian_Error_Rate</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span>
 
 
-<div class="viewcode-block" id="migration_matrix_stability"><a class="viewcode-back" href="../../meliora/meliora.Bayesian_Error_Rate.html#meliora.Bayesian_Error_Rate.migration_matrix_stability">[docs]</a><span class="k">def</span> <span class="nf">migration_matrix_stability</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">initial_ratings_col</span><span class="p">,</span> <span class="n">final_ratings_col</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;z-tests to verify stability of transition matrices</span>
+<div class="viewcode-block" id="bayesian_error_rate"><a class="viewcode-back" href="../../meliora/meliora.Bayesian_Error_Rate.html#meliora.Bayesian_Error_Rate.bayesian_error_rate">[docs]</a><span class="k">def</span> <span class="nf">bayesian_error_rate</span><span class="p">(</span><span class="n">default_flag</span><span class="p">,</span> <span class="n">prob_default</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    BER is the proportion of the whole sample that is misclassified</span>
+<span class="sd">    when the rating system is in optimal use. For a perfect rating model,</span>
+<span class="sd">    the BER has a value of zero. A model&#39;s BER depends on the probability</span>
+<span class="sd">    of default. The lower the BER, and the lower the classification error,</span>
+<span class="sd">    the better the model.</span>
 
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    df: array-like, at least 2D</span>
-<span class="sd">        data</span>
-<span class="sd">    initial_ratings_col: string</span>
-<span class="sd">        name of column with initial ratings values</span>
-<span class="sd">    final_ratings_col: string</span>
-<span class="sd">        name of column with final ratings values</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    z_df: array-like</span>
-<span class="sd">        z statistic for each ratings pair</span>
-<span class="sd">    phi_df: array-like</span>
-<span class="sd">        p-values for each ratings pair</span>
-
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----------</span>
-<span class="sd">    The Null hypothesis is that p_ij &gt;= p_ij-1 or p_ij-1 &gt;= p_ij</span>
-<span class="sd">    depending on whether the (ij) entry is below or above main diagonal</span>
-
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        &gt;&gt;&gt; res = migration_matrix_stability(df=df, initial_ratings_col=&#39;ratings&#39;, final_ratings_col=&#39;ratings2&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; print(res)</span>
+<span class="sd">    The Bayesian error rate (or classification error or minimum error)</span>
+<span class="sd">    specifies the minimum probability of error if the rating system or score</span>
+<span class="sd">    function under consideration is used for a yes/no decision whether a borrower</span>
+<span class="sd">    will default or not. The error can be estimated parametrically, e.g.</span>
+<span class="sd">    assuming normal score distributions, or non-parametrically, for instance</span>
+<span class="sd">    with kernel density estimation methods. If parametric estimation is</span>
+<span class="sd">    applied, the distributional assumptions have to be carefully checked.</span>
+<span class="sd">    Non-parametric estimation will be critical if sample sizes are small.</span>
+<span class="sd">    In its general form, the error rate depends on the total portfolio</span>
+<span class="sd">    probability of default. As a consequence, in many cases its magnitude</span>
+<span class="sd">    is influenced much more by the probability of erroneously identifying a</span>
+<span class="sd">    non-defaulter as a defaulter than by the probability of not detecting a</span>
+<span class="sd">    defaulter. In practice, therefore, the error rate is often applied</span>
+<span class="sd">    with a fictitious 50% probability of default. In this case, the error</span>
+<span class="sd">    rate is equivalent to the Kolmogorov-Smirnov statistic and to the Pietra index.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">initial_ratings_col</span><span class="p">]</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">final_ratings_col</span><span class="p">]</span>
-    <span class="n">N_ij</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
-    <span class="n">p_ij</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span>
-    <span class="n">K</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
-    <span class="n">z_df</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
 
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;default_flag&#39;</span><span class="p">:</span> <span class="n">default_flag</span><span class="p">,</span>
+             <span class="s1">&#39;prob_default&#39;</span><span class="p">:</span> <span class="n">prob_default</span>
+             <span class="p">}</span>
 
-            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">j</span><span class="p">:</span>
-                <span class="n">Ni</span> <span class="o">=</span> <span class="n">N_ij</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 
-                <span class="n">num</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">den_a</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_b</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_c</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">Ni</span>
+    <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">roc_curve</span><span class="p">(</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;default_flag&#39;</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;prob_default&#39;</span><span class="p">])</span>
+    <span class="n">roc_curve_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="n">thresholds</span><span class="p">,</span>
+                                <span class="s1">&#39;hit_rate&#39;</span><span class="p">:</span> <span class="n">tpr</span><span class="p">,</span>
+                                 <span class="s1">&#39;false_alarm_rate&#39;</span><span class="p">:</span> <span class="n">fpr</span><span class="p">})</span>
 
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">den_a</span> <span class="o">+</span> <span class="n">den_b</span> <span class="o">+</span> <span class="n">den_c</span><span class="p">)</span>
+    <span class="n">p_d</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">default_flag</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
-            <span class="k">elif</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">j</span><span class="p">:</span>
-                <span class="n">Ni</span> <span class="o">=</span> <span class="n">N_ij</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">roc_curve_df</span><span class="p">[</span><span class="s1">&#39;ber&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">p_d</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">roc_curve_df</span><span class="o">.</span><span class="n">hit_rate</span><span class="p">)</span> <span class="o">+</span> \
+        <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p_d</span><span class="p">)</span> <span class="o">*</span> <span class="n">roc_curve_df</span><span class="o">.</span><span class="n">false_alarm_rate</span>
 
-                <span class="n">num</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">den_a</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_b</span> <span class="o">=</span> <span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">Ni</span>
-                <span class="n">den_c</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">p_ij</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">Ni</span>
-
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">num</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">den_a</span> <span class="o">+</span> <span class="n">den_b</span> <span class="o">+</span> <span class="n">den_c</span><span class="p">)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-
-                <span class="n">z_ij</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-            <span class="n">z_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_ij</span>
-    <span class="n">phi_df</span> <span class="o">=</span> <span class="n">z_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">norm</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">y</span><span class="p">)))</span>
-    <span class="k">return</span> <span class="n">z_df</span><span class="p">,</span> <span class="n">phi_df</span></div>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">roc_curve_df</span><span class="p">[</span><span class="s1">&#39;ber&#39;</span><span class="p">]),</span> <span class="mi">3</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
