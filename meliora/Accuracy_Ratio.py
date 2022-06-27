@@ -1,77 +1,62 @@
-import numpy as np
-import pandas as pd
-from scipy.stats import norm
+from sklearn.metrics import accuracy_score
 
 
-def migration_matrix_stability(df, initial_ratings_col, final_ratings_col):
-    """z-tests to verify stability of transition matrices
+def accuracy_ratio(y_test, pred):
+    """Accuracy classification score.
+
+    In multilabel classification, this function computes subset accuracy:
+    the set of labels predicted for a sample must *exactly* match the
+    corresponding set of labels in y_true.
+
+    **This is a copy-paste from sklearn package. Contact them to ask 
+    for referencing rules.**
+
+    https://github.com/scikit-learn/scikit-learn/blob/80598905e/sklearn/metrics/_classification.py
 
     Parameters
     ----------
-    df: array-like, at least 2D
-        data
-    initial_ratings_col: string
-        name of column with initial ratings values
-    final_ratings_col: string
-        name of column with final ratings values
+    y_true : 1d array-like, or label indicator array / sparse matrix
+        Ground truth (correct) labels.
+    y_pred : 1d array-like, or label indicator array / sparse matrix
+        Predicted labels, as returned by a classifier.
+    normalize : bool, default=True
+        If ``False``, return the number of correctly classified samples.
+        Otherwise, return the fraction of correctly classified samples.
+    sample_weight : array-like of shape (n_samples,), default=None
+        Sample weights.
 
     Returns
     -------
-    z_df: array-like
-        z statistic for each ratings pair
-    phi_df: array-like
-        p-values for each ratings pair
+    score : float
+        If ``normalize == True``, return the fraction of correctly
+        classified samples (float), else returns the number of correctly
+        classified samples (int).
+        The best performance is 1 with ``normalize == True`` and the number
+        of samples with ``normalize == False``.
 
+    See Also
+    --------
+    balanced_accuracy_score : Compute the balanced accuracy to deal with
+        imbalanced datasets.
 
     Notes
-    -----------
-    The Null hypothesis is that p_ij >= p_ij-1 or p_ij-1 >= p_ij
-    depending on whether the (ij) entry is below or above main diagonal
-
+    -----
+    In binary classification, this function is equal to the `jaccard_score`
+    function.
 
     Examples
     --------
-    .. code-block:: python
-
-        >>> res = migration_matrix_stability(df=df, initial_ratings_col='ratings', final_ratings_col='ratings2')
-        >>> print(res)
+    >>> from sklearn.metrics import accuracy_score
+    >>> y_pred = [0, 2, 1, 3]
+    >>> y_true = [0, 1, 2, 3]
+    >>> accuracy_score(y_true, y_pred)
+    0.5
+    >>> accuracy_score(y_true, y_pred, normalize=False)
+    2
+    In the multilabel case with binary label indicators:
+    >>> import numpy as np
+    >>> accuracy_score(np.array([[0, 1], [1, 1]]), np.ones((2, 2)))
+    0.5
     """
-    a = df[initial_ratings_col]
-    b = df[final_ratings_col]
-    N_ij = pd.crosstab(a, b)
-    p_ij = pd.crosstab(a, b, normalize='index')
-    K = len(set(a))
-    z_df = p_ij.copy()
-    for i in range(1, K+1):
-        for j in range(1, K+1):
-            if i == j:
 
-                z_ij = np.nan
-
-            if i > j:
-                Ni = N_ij.sum(axis=1).values[i-1]
-
-                num = p_ij.iloc[i-1, j-1+1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1+1]*(1-p_ij.iloc[i-1, j-1+1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1+1]/Ni
-
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
-
-            elif i < j:
-                Ni = N_ij.sum(axis=1).values[i-1]
-
-                num = p_ij.iloc[i-1, j-1-1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1-1]*(1-p_ij.iloc[i-1, j-1-1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1-1]/Ni
-
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
-
-            else:
-
-                z_ij = np.nan
-
-            z_df.iloc[i-1, j-1] = z_ij
-    phi_df = z_df.apply(lambda x: x.apply(lambda y: norm.cdf(y)))
-    return z_df, phi_df
+    return accuracy_score(y_test, pred)

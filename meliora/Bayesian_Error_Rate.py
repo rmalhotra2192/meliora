@@ -1,77 +1,47 @@
-import numpy as np
 import pandas as pd
-from scipy.stats import norm
+from sklearn import metrics
 
 
-def migration_matrix_stability(df, initial_ratings_col, final_ratings_col):
-    """z-tests to verify stability of transition matrices
-
-    Parameters
-    ----------
-    df: array-like, at least 2D
-        data
-    initial_ratings_col: string
-        name of column with initial ratings values
-    final_ratings_col: string
-        name of column with final ratings values
-
-    Returns
-    -------
-    z_df: array-like
-        z statistic for each ratings pair
-    phi_df: array-like
-        p-values for each ratings pair
-
-
-    Notes
-    -----------
-    The Null hypothesis is that p_ij >= p_ij-1 or p_ij-1 >= p_ij
-    depending on whether the (ij) entry is below or above main diagonal
-
-
-    Examples
-    --------
-    .. code-block:: python
-
-        >>> res = migration_matrix_stability(df=df, initial_ratings_col='ratings', final_ratings_col='ratings2')
-        >>> print(res)
+def bayesian_error_rate(default_flag, prob_default):
     """
-    a = df[initial_ratings_col]
-    b = df[final_ratings_col]
-    N_ij = pd.crosstab(a, b)
-    p_ij = pd.crosstab(a, b, normalize='index')
-    K = len(set(a))
-    z_df = p_ij.copy()
-    for i in range(1, K+1):
-        for j in range(1, K+1):
-            if i == j:
+    BER is the proportion of the whole sample that is misclassified
+    when the rating system is in optimal use. For a perfect rating model,
+    the BER has a value of zero. A model's BER depends on the probability
+    of default. The lower the BER, and the lower the classification error,
+    the better the model.
 
-                z_ij = np.nan
+    The Bayesian error rate (or classification error or minimum error)
+    specifies the minimum probability of error if the rating system or score
+    function under consideration is used for a yes/no decision whether a borrower
+    will default or not. The error can be estimated parametrically, e.g.
+    assuming normal score distributions, or non-parametrically, for instance
+    with kernel density estimation methods. If parametric estimation is
+    applied, the distributional assumptions have to be carefully checked.
+    Non-parametric estimation will be critical if sample sizes are small.
+    In its general form, the error rate depends on the total portfolio
+    probability of default. As a consequence, in many cases its magnitude
+    is influenced much more by the probability of erroneously identifying a
+    non-defaulter as a defaulter than by the probability of not detecting a
+    defaulter. In practice, therefore, the error rate is often applied
+    with a fictitious 50% probability of default. In this case, the error
+    rate is equivalent to the Kolmogorov-Smirnov statistic and to the Pietra index.
+    """
 
-            if i > j:
-                Ni = N_ij.sum(axis=1).values[i-1]
+    frame = {'default_flag': default_flag,
+             'prob_default': prob_default
+             }
 
-                num = p_ij.iloc[i-1, j-1+1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1+1]*(1-p_ij.iloc[i-1, j-1+1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1+1]/Ni
+    df = pd.DataFrame(frame)
 
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
+    fpr, tpr, thresholds = metrics.roc_curve(
+        df['default_flag'], df['prob_default'])
+    roc_curve_df = pd.DataFrame({'c': thresholds,
+                                'hit_rate': tpr,
+                                 'false_alarm_rate': fpr})
 
-            elif i < j:
-                Ni = N_ij.sum(axis=1).values[i-1]
+    p_d = df.default_flag.sum()/len(df)
 
-                num = p_ij.iloc[i-1, j-1-1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1-1]*(1-p_ij.iloc[i-1, j-1-1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1-1]/Ni
+    roc_curve_df['ber'] = p_d*(1 - roc_curve_df.hit_rate) + \
+        (1 - p_d) * roc_curve_df.false_alarm_rate
 
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
-
-            else:
-
-                z_ij = np.nan
-
-            z_df.iloc[i-1, j-1] = z_ij
-    phi_df = z_df.apply(lambda x: x.apply(lambda y: norm.cdf(y)))
-    return z_df, phi_df
+    return round(min(roc_curve_df['ber']), 3)

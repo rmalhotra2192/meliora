@@ -1,77 +1,124 @@
-import numpy as np
-import pandas as pd
-from scipy.stats import norm
+from scipy import stats
 
 
-def migration_matrix_stability(df, initial_ratings_col, final_ratings_col):
-    """z-tests to verify stability of transition matrices
+def ks(rvs, cdf, args=(), N=20, alternative='two-sided', mode='auto'):
+    """
+    KS is the maximum distance between two population distributions. 
+
+    This statistic helps discriminate default accounts from non-default 
+    accounts. It is also used to determine the best cutoff in application 
+    scoring. The best cutoff maximizes KS, which becomes the best 
+    differentiator between the two populations. The KS value can range 
+    between 0 and 1, where 1 implies that the model is perfectly accurate 
+    in predicting default accounts or separating the two populations. 
+    A higher KS denotes a better model.
+
+    Performs the (one-sample or two-sample) Kolmogorov-Smirnov test for
+    goodness of fit.
+    The one-sample test compares the underlying distribution F(x) of a sample
+    against a given distribution G(x). The two-sample test compares the
+    underlying distributions of two independent samples. Both tests are valid
+    only for continuous distributions.
 
     Parameters
     ----------
-    df: array-like, at least 2D
-        data
-    initial_ratings_col: string
-        name of column with initial ratings values
-    final_ratings_col: string
-        name of column with final ratings values
+    rvs : str, array_like, or callable
+        If an array, it should be a 1-D array of observations of random
+        variables.
+        If a callable, it should be a function to generate random variables;
+        it is required to have a keyword argument 'size'.
+        If a string, it should be the name of a distribution in 'scipy.stats',
+        which will be used to generate random variables.
+    cdf : str, array_like or callable
+        If array_like, it should be a 1-D array of observations of random
+        variables, and the two-sample test is performed
+        (and rvs must be array_like).
+        If a callable, that callable is used to calculate the cdf.
+        If a string, it should be the name of a distribution in 'scipy.stats',
+        which will be used as the cdf function.
+    args : tuple, sequence, optional
+            Distribution parameters, used if 'rvs' or 'cdf' are strings or
+            callables.
+
+    N : int, optional
+        Sample size if 'rvs' is string or callable.  Default is 20.
+    alternative : {'two-sided', 'less', 'greater'}, optional
+        Defines the null and alternative hypotheses. Default is 'two-sided'.
+        Please see explanations in the Notes below.
+    mode : {'auto', 'exact', 'approx', 'asymp'}, optional
+        Defines the distribution used for calculating the p-value.
+        The following options are available (default is 'auto'):
+          * 'auto' : selects one of the other options.
+          * 'exact' : uses the exact distribution of test statistic.
+          * 'approx' : approximates the two-sided probability with twice the
+            one-sided probability
+          * 'asymp': uses asymptotic distribution of test statistic
 
     Returns
     -------
-    z_df: array-like
-        z statistic for each ratings pair
-    phi_df: array-like
-        p-values for each ratings pair
+    statistic : float
+                KS test statistic, either D, D+ or D-.
+    pvalue :  float
+                One-tailed or two-tailed p-value.
+
+    See Also
+    --------
+    ks_2samp
 
 
     Notes
-    -----------
-    The Null hypothesis is that p_ij >= p_ij-1 or p_ij-1 >= p_ij
-    depending on whether the (ij) entry is below or above main diagonal
+    -----
+    There are three options for the null and corresponding alternative
+    hypothesis that can be selected using the `alternative` parameter.
 
+    - `two-sided`: The null hypothesis is that the two distributions are
+      identical, F(x)=G(x) for all x; the alternative is that they are not
+      identical.
+    - `less`: The null hypothesis is that F(x) >= G(x) for all x; the
+      alternative is that F(x) < G(x) for at least one x.
+    - `greater`: The null hypothesis is that F(x) <= G(x) for all x; the
+      alternative is that F(x) > G(x) for at least one x.
+    Note that the alternative hypotheses describe the *CDFs* of the
+    underlying distributions, not the observed values. For example,
+    suppose x1 ~ F and x2 ~ G. If F(x) > G(x) for all x, the values in
+    x1 tend to be less than those in x2.
 
     Examples
     --------
-    .. code-block:: python
+    >>> from scipy import stats
+    >>> rng = np.random.default_rng()
+    >>> x = np.linspace(-15, 15, 9)
+    >>> stats.kstest(x, 'norm')
+    KstestResult(statistic=0.444356027159..., pvalue=0.038850140086...)
 
-        >>> res = migration_matrix_stability(df=df, initial_ratings_col='ratings', final_ratings_col='ratings2')
-        >>> print(res)
+    >>> stats.kstest(stats.norm.rvs(size=100, random_state=rng), stats.norm.cdf)
+    KstestResult(statistic=0.165471391799..., pvalue=0.007331283245...)
+
+    >>> x = stats.norm.rvs(loc=0.2, size=100, random_state=rng)
+    >>> stats.kstest(x, 'norm', alternative='less')
+    KstestResult(statistic=0.1002033514..., pvalue=0.1255446444...)
+    Reject null hypothesis in favor of alternative hypothesis: less
+
+    >>> stats.kstest(x, 'norm', alternative='greater')
+    KstestResult(statistic=0.018749806388..., pvalue=0.920581859791...)
+    Don't reject null hypothesis in favor of alternative hypothesis: greater
+
+    >>> stats.kstest(x, 'norm')
+    KstestResult(statistic=0.100203351482..., pvalue=0.250616879765...)
+    *Testing t distributed random variables against normal distribution*
+    With 100 degrees of freedom the t distribution looks close to the normal
+    distribution, and the K-S test does not reject the hypothesis that the
+    sample came from the normal distribution:
+
+    >>> stats.kstest(stats.t.rvs(100, size=100, random_state=rng), 'norm')
+    KstestResult(statistic=0.064273776544..., pvalue=0.778737758305...)
+    With 3 degrees of freedom the t distribution looks sufficiently different
+    from the normal distribution, that we can reject the hypothesis that the
+    sample came from the normal distribution at the 10% level:
+
+    >>> stats.kstest(stats.t.rvs(3, size=100, random_state=rng), 'norm')
+    KstestResult(statistic=0.128678487493..., pvalue=0.066569081515...)
+
     """
-    a = df[initial_ratings_col]
-    b = df[final_ratings_col]
-    N_ij = pd.crosstab(a, b)
-    p_ij = pd.crosstab(a, b, normalize='index')
-    K = len(set(a))
-    z_df = p_ij.copy()
-    for i in range(1, K+1):
-        for j in range(1, K+1):
-            if i == j:
 
-                z_ij = np.nan
-
-            if i > j:
-                Ni = N_ij.sum(axis=1).values[i-1]
-
-                num = p_ij.iloc[i-1, j-1+1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1+1]*(1-p_ij.iloc[i-1, j-1+1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1+1]/Ni
-
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
-
-            elif i < j:
-                Ni = N_ij.sum(axis=1).values[i-1]
-
-                num = p_ij.iloc[i-1, j-1-1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1-1]*(1-p_ij.iloc[i-1, j-1-1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1-1]/Ni
-
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
-
-            else:
-
-                z_ij = np.nan
-
-            z_df.iloc[i-1, j-1] = z_ij
-    phi_df = z_df.apply(lambda x: x.apply(lambda y: norm.cdf(y)))
-    return z_df, phi_df
+    return stats.kstest(rvs, cdf, args=(), N=20, alternative='two-sided', mode='auto')
