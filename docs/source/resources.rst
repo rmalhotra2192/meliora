@@ -1,0 +1,26 @@
+====================
+Resources
+====================
+
+Credit risk modelling has been covered in great detail by many excellent 
+authors. The list of resources in this page presents only a small
+selectionof what is available.
+
+Validation resources
+----------------------
+
+1. Instructions for reporting the validation results of internal models: `a
+<https://www.bankingsupervision.europa.eu/banking/tasks/internal_models/shared/pdf/instructions_validation_reporting_credit_risk.en.pdf>`_
+
+2. Studies on the Validation of Internal Rating Systems: `b
+<https://www.bis.org/publ/bcbs_wp14.pdf>`_
+
+3. scikit-learn User Guide: `c
+<https://scikit-learn.org/stable/user_guide.html>`_
+
+
+
+
+  
+  
+

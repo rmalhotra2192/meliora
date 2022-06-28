@@ -7,6 +7,7 @@ Welcome to Credit Risk Toolbox's documentation!
 
    introduction
    tests
+   resources
    contributing
    usage
    
