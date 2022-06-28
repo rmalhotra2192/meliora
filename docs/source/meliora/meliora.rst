@@ -1,6 +1,8 @@
-Validation tests
+meliora package
 ===============
 
+Submodules
+----------
 
 .. toctree::
    :maxdepth: 4
@@ -11,7 +13,6 @@ Validation tests
    meliora.Bucket_Test
    meliora.CIER
    meliora.CLAR
-   meliora.Coefficient_of_Concordance
    meliora.Concentration_of_Rating_Grades
    meliora.ELBE_t_test
    meliora.Grade_Migrations
@@ -35,3 +36,11 @@ Validation tests
    meliora.Spearman_Rank_Correlation
    meliora.Spiegelhalter_Test
    meliora.Traffic_Lights_Approach
+
+Module contents
+---------------
+
+.. automodule:: meliora
+   :members:
+   :undoc-members:
+   :show-inheritance:

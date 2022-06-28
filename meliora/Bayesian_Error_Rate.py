@@ -10,21 +10,36 @@ def bayesian_error_rate(default_flag, prob_default):
     of default. The lower the BER, and the lower the classification error,
     the better the model.
 
-    The Bayesian error rate (or classification error or minimum error)
-    specifies the minimum probability of error if the rating system or score
-    function under consideration is used for a yes/no decision whether a borrower
-    will default or not. The error can be estimated parametrically, e.g.
-    assuming normal score distributions, or non-parametrically, for instance
-    with kernel density estimation methods. If parametric estimation is
-    applied, the distributional assumptions have to be carefully checked.
-    Non-parametric estimation will be critical if sample sizes are small.
-    In its general form, the error rate depends on the total portfolio
-    probability of default. As a consequence, in many cases its magnitude
-    is influenced much more by the probability of erroneously identifying a
-    non-defaulter as a defaulter than by the probability of not detecting a
-    defaulter. In practice, therefore, the error rate is often applied
+    The Bayesian error rate specifies the minimum probability of error if
+    the rating system or score function under consideration is used for a
+    yes/no decision whether a borrower will default or not. The error can
+    be estimated parametrically, e.g. assuming normal score distributions,
+    or non-parametrically, for instance with kernel density estimation methods.
+
+    If parametric estimation is applied, the distributional assumptions have
+    to be carefully checked. Non-parametric estimation will be critical if
+    sample sizes are small. In its general form, the error rate depends on
+    the total portfolio probability of default. As a consequence, in many
+    cases its magnitude is influenced much more by the probability of
+    erroneously identifying a non-defaulter as a defaulter than by the
+    probability of not detecting a defaulter.
+
+    In practice, therefore, the error rate is often applied
     with a fictitious 50% probability of default. In this case, the error
     rate is equivalent to the Kolmogorov-Smirnov statistic and to the Pietra index.
+
+    Parameters
+    ----------
+    default_flag : pandas series
+        Boolean flag indicating whether the borrower has actually defaulted
+    prob_default : pandas series
+        Predicted default probability, as returned by a classifier.
+
+    Returns
+    -------
+    score : float
+        Return Bayesian Error Rate
+
     """
 
     frame = {'default_flag': default_flag,

@@ -8,10 +8,7 @@ def accuracy_ratio(y_test, pred):
     the set of labels predicted for a sample must *exactly* match the
     corresponding set of labels in y_true.
 
-    **This is a copy-paste from sklearn package. Contact them to ask 
-    for referencing rules.**
-
-    https://github.com/scikit-learn/scikit-learn/blob/80598905e/sklearn/metrics/_classification.py
+    This a wrapper of scikit-learn function.
 
     Parameters
     ----------
@@ -42,7 +39,7 @@ def accuracy_ratio(y_test, pred):
     Notes
     -----
     In binary classification, this function is equal to the `jaccard_score`
-    function.
+    function. 
 
     Examples
     --------
