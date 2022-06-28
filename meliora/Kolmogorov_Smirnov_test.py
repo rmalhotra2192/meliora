@@ -71,12 +71,12 @@ def ks(rvs, cdf, args=(), N=20, alternative='two-sided', mode='auto'):
     There are three options for the null and corresponding alternative
     hypothesis that can be selected using the `alternative` parameter.
 
-    - `two-sided`: The null hypothesis is that the two distributions are
+    - 'two-sided': The null hypothesis is that the two distributions are
       identical, F(x)=G(x) for all x; the alternative is that they are not
       identical.
-    - `less`: The null hypothesis is that F(x) >= G(x) for all x; the
+    - 'less': The null hypothesis is that F(x) >= G(x) for all x; the
       alternative is that F(x) < G(x) for at least one x.
-    - `greater`: The null hypothesis is that F(x) <= G(x) for all x; the
+    - 'greater': The null hypothesis is that F(x) <= G(x) for all x; the
       alternative is that F(x) > G(x) for at least one x.
     Note that the alternative hypotheses describe the *CDFs* of the
     underlying distributions, not the observed values. For example,
@@ -97,24 +97,15 @@ def ks(rvs, cdf, args=(), N=20, alternative='two-sided', mode='auto'):
     >>> x = stats.norm.rvs(loc=0.2, size=100, random_state=rng)
     >>> stats.kstest(x, 'norm', alternative='less')
     KstestResult(statistic=0.1002033514..., pvalue=0.1255446444...)
-    Reject null hypothesis in favor of alternative hypothesis: less
 
     >>> stats.kstest(x, 'norm', alternative='greater')
     KstestResult(statistic=0.018749806388..., pvalue=0.920581859791...)
-    Don't reject null hypothesis in favor of alternative hypothesis: greater
 
     >>> stats.kstest(x, 'norm')
     KstestResult(statistic=0.100203351482..., pvalue=0.250616879765...)
-    *Testing t distributed random variables against normal distribution*
-    With 100 degrees of freedom the t distribution looks close to the normal
-    distribution, and the K-S test does not reject the hypothesis that the
-    sample came from the normal distribution:
 
     >>> stats.kstest(stats.t.rvs(100, size=100, random_state=rng), 'norm')
     KstestResult(statistic=0.064273776544..., pvalue=0.778737758305...)
-    With 3 degrees of freedom the t distribution looks sufficiently different
-    from the normal distribution, that we can reject the hypothesis that the
-    sample came from the normal distribution at the 10% level:
 
     >>> stats.kstest(stats.t.rvs(3, size=100, random_state=rng), 'norm')
     KstestResult(statistic=0.128678487493..., pvalue=0.066569081515...)
