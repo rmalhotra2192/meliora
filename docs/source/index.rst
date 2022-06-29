@@ -16,7 +16,7 @@ Introduction
 .. toctree::
     :hidden:
     :maxdepth: 2
-    :caption: Functions and classes
+    :caption: Validation tests
 
     meliora/meliora
 
