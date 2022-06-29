@@ -4,10 +4,8 @@ Resources
 
 Credit risk modelling has been covered in great detail by many excellent 
 authors. The list of resources in this page presents only a small
-selectionof what is available.
-
-Validation resources
-----------------------
+selection of references that contains information about credit
+risk modelling and validation.
 
 1. Instructions for reporting the validation results of internal models: `a
 <https://www.bankingsupervision.europa.eu/banking/tasks/internal_models/shared/pdf/instructions_validation_reporting_credit_risk.en.pdf>`_

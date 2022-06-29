@@ -39,7 +39,7 @@ def accuracy_ratio(y_test, pred):
     Notes
     -----
     In binary classification, this function is equal to the `jaccard_score`
-    function. 
+    function.
 
     Examples
     --------

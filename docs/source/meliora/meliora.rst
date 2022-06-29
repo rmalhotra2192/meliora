@@ -1,8 +1,7 @@
-meliora package
-===============
+=====================
 
-Submodules
-----------
+Discrimation tests
+--------------------
 
 .. toctree::
    :maxdepth: 4
@@ -19,6 +18,14 @@ Submodules
    meliora.Herfhindahl_Index
    meliora.Hoshmer_Lemeshow_Test
    meliora.Information_Value
+
+
+Calibration
+--------------------
+.. toctree::
+   :maxdepth: 4
+
+
    meliora.Jeffreys_Test
    meliora.Kendall_tau
    meliora.Kolmogorov_Smirnov_test
@@ -32,15 +39,13 @@ Submodules
    meliora.Population_Stability_Index
    meliora.Receiver_Operating_Characteristic
    meliora.Redelmeier_Test
+
+Stability
+--------------------
+.. toctree::
+   :maxdepth: 4
+
    meliora.Somers_D
    meliora.Spearman_Rank_Correlation
    meliora.Spiegelhalter_Test
    meliora.Traffic_Lights_Approach
-
-Module contents
----------------
-
-.. automodule:: meliora
-   :members:
-   :undoc-members:
-   :show-inheritance:
