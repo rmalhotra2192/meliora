@@ -64,6 +64,6 @@ Stability / other
    meliora.Grade_Migrations
 
 The analyses provide insight with regard to the stability of rating model
-outputs over the observation period.The stability of risk estimates is 
+outputs over the observation period. The stability of risk estimates is 
 assessed using customer migrations, stability of the migration matrix 
 and concentration in rating grades.
