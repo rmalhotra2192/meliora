@@ -1,77 +1,77 @@
-import numpy as np
 import pandas as pd
-from scipy.stats import norm
+from sklearn.metrics import auc
 
 
-def migration_matrix_stability(df, initial_ratings_col, final_ratings_col):
-    """z-tests to verify stability of transition matrices
+def loss_capture_ratio(ead, predicted_ratings, realised_outcomes):
+    """
+    The loss_capture_ratio measures how well a model is able to
+    rank LGDs when compared to the observed losses.
+
+    For this approach three plots are relevant: the model loss
+    capture curve, ideal loss capture curve and the random loss
+    capture curve. These curves are constructed in the same way
+    as the curves for the CAP. The main difference is the data,
+    which is for LGDs and the LR a (continuous) percentage of the EAD,
+    while for the CAP it is binary.
+
+    The LC can be percentage weighted, which simply uses the LGD and
+    LR percentages as input, while it can also be EAD weighted, which
+    uses the LGD and LR multiplied with the respective EAD as input.
+    The results between the two approaches can differ  if the portfolio
+    is not-well balanced.
 
     Parameters
     ----------
-    df: array-like, at least 2D
-        data
-    initial_ratings_col: string
-        name of column with initial ratings values
-    final_ratings_col: string
-        name of column with final ratings values
+    ead: pandas Series
+        Exposure at Default
+    predicted_ratings: pandas Series
+        predicted LGD, can be ordinal or continuous
+    realised_outcomes: pandas Series
+        realised LGD, can be ordinal or continuous
 
     Returns
     -------
-    z_df: array-like
-        z statistic for each ratings pair
-    phi_df: array-like
-        p-values for each ratings pair
+    LCR: scalar
+        Loss Capture Ratio
 
+    References
+    ----------------
 
-    Notes
-    -----------
-    The Null hypothesis is that p_ij >= p_ij-1 or p_ij-1 >= p_ij
-    depending on whether the (ij) entry is below or above main diagonal
+    Li, D., Bhariok, R., Keenan, S., & Santilli, S. (2009). Validation techniques 
+    and performance metrics for loss given default models. 
+    The Journal of Risk Model Validation, 33, 3-26.
 
 
     Examples
     --------
-    .. code-block:: python
-
-        >>> res = migration_matrix_stability(df=df, initial_ratings_col='ratings', final_ratings_col='ratings2')
+        >>> res = loss_capture_ratio(ead, predicted_ratings, realised_outcomes)
         >>> print(res)
     """
-    a = df[initial_ratings_col]
-    b = df[final_ratings_col]
-    N_ij = pd.crosstab(a, b)
-    p_ij = pd.crosstab(a, b, normalize='index')
-    K = len(set(a))
-    z_df = p_ij.copy()
-    for i in range(1, K+1):
-        for j in range(1, K+1):
-            if i == j:
 
-                z_ij = np.nan
+    # Create a dataframe
+    frame = {'ead': ead,
+             'predicted_ratings': predicted_ratings,
+             'realised_outcomes': realised_outcomes
+             }
+    df = pd.DataFrame(frame)
 
-            if i > j:
-                Ni = N_ij.sum(axis=1).values[i-1]
+    # Prepare data
+    df['loss'] = df['ead'] * df['realised_outcomes']
 
-                num = p_ij.iloc[i-1, j-1+1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1+1]*(1-p_ij.iloc[i-1, j-1+1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1+1]/Ni
+    # Model loss capture curve
+    df2 = df.sort_values(by='predicted_ratings', ascending=False)
+    df2['cumulative_loss'] = df2.cumsum()['loss']
+    df2['cumulative_loss_capture_percentage'] = df2.cumsum()['loss']/df2.loss.sum()
+    auc_curve1 = auc([i for i in range(len(df2))], df2.cumulative_loss_capture_percentage)
+    random_auc1 = 0.5 * len(df2) * 1
 
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
+    # Ideal loss capture curve
+    df3 = df.sort_values(by='realised_outcomes', ascending=False)
+    df3['cumulative_loss'] = df3.cumsum()['loss']
+    df3['cumulative_loss_capture_percentage'] = df3.cumsum()['loss']/df3.loss.sum()
+    auc_curve2 = auc([i for i in range(len(df3))], df3.cumulative_loss_capture_percentage)
+    random_auc2 = 0.5 * len(df3) * 1
 
-            elif i < j:
-                Ni = N_ij.sum(axis=1).values[i-1]
+    loss_capture_ratio = (auc_curve1 - random_auc1)/(auc_curve2 - random_auc2)
 
-                num = p_ij.iloc[i-1, j-1-1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1-1]*(1-p_ij.iloc[i-1, j-1-1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1-1]/Ni
-
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
-
-            else:
-
-                z_ij = np.nan
-
-            z_df.iloc[i-1, j-1] = z_ij
-    phi_df = z_df.apply(lambda x: x.apply(lambda y: norm.cdf(y)))
-    return z_df, phi_df
+    return loss_capture_ratio

@@ -52,7 +52,7 @@ parameter adequately predicts the occurrence of defaults – i.e. that PD estima
 constitute reliable forecasts of default rates.
 
 
-Stability / other
+Stability
 --------------------
 .. toctree::
    :maxdepth: 4
