@@ -26,11 +26,11 @@ def clar(predicted_ratings, realised_outcomes):
 
     References
     --------------
-    Ozdemir, B., Miu, P., 2009. Basel II Implementation. 
-    A Guide to Developing and Validating a Compliant Internal Risk Rating 
+    [1] Ozdemir, B., Miu, P., 2009. Basel II Implementation.
+    A Guide to Developing and Validating a Compliant Internal Risk Rating
     System. McGraw-Hill, USA.
 
-    See also: https://rdrr.io/cran/VUROCS/man/clar.html
+    [2] See also: https://rdrr.io/cran/VUROCS/man/clar.html
 
     Examples
     --------

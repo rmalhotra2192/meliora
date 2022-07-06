@@ -39,11 +39,10 @@ def kendall_tau(x, y, variant='b'):
            Vol. 30, No. 1/2, pp. 81-93, 1938.
     [2] Maurice G. Kendall, "The treatment of ties in ranking problems",
            Biometrika Vol. 33, No. 3, pp. 239-251. 1945.
-    [3] Gottfried E. Noether, "Elements of Nonparametric Statistics", John
-           Wiley & Sons, 1967.
-    [4] Peter M. Fenwick, "A new data structure for cumulative frequency
-           tables", Software: Practice and Experience, Vol. 24, No. 3,
-           pp. 327-336, 1994.
+    [3] Gottfried E. Noether, "Elements of Nonparametric Statistics",
+        John Wiley & Sons, 1967.
+    [4] Peter M. Fenwick, "A new data structure for cumulative frequency tables",
+        Software: Practice and Experience, Vol. 24, No. 3, pp. 327-336, 1994.
     [5] Maurice G. Kendall, "Rank Correlation Methods" (4th Edition),
            Charles Griffin & Co., 1970.
 

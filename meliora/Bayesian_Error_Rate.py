@@ -36,10 +36,18 @@ def bayesian_error_rate(default_flag, prob_default):
         Predicted default probability, as returned by a classifier.
 
     Returns
-    -------
+    ---------
     score : float
-        Return Bayesian Error Rate
+        Bayesian Error Rate.
+        
 
+    Examples
+    --------
+    >>> from scipy import stats
+    >>> default_flag = [1, 0, 0, 1, 1]
+    >>> prob_default = [0.01, 0.04, 0.07, 0.11, 0]
+    >>> bayesian_error_rate(default_flag, prob_default)
+    -0.47140452079103173
     """
 
     frame = {'default_flag': default_flag,

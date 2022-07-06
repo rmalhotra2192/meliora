@@ -13,16 +13,11 @@ Discrimination tests
    meliora.Bucket_Test
    meliora.CIER
    meliora.CLAR
-   meliora.ELBE_t_test
    meliora.Information_Value
    meliora.Kendall_tau
    meliora.Kolmogorov_Smirnov_test
-   meliora.Kullback_Leibler_distance
-   meliora.LGD_t_test
    meliora.Loss_Capture_Ratio
-   meliora.Pietra_Index
    meliora.Receiver_Operating_Characteristic
-   meliora.Redelmeier_Test
    meliora.Somers_D
    meliora.Spearman_Rank_Correlation
 
@@ -39,9 +34,11 @@ Calibration
    :hidden:
 
    meliora.Binomial_test
+   meliora.ELBE_t_test
    meliora.Hoshmer_Lemeshow_Test
    meliora.Jeffreys_Test
    meliora.Normal_Test
+   meliora.LGD_t_test
    meliora.Loss_Shortfall
    meliora.Mean_Absolute_Deviation
    meliora.Spiegelhalter_Test
