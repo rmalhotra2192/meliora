@@ -31,7 +31,7 @@ The main contributors started building their first statistical credit models bac
 
 This package is standing on the shoulders of giants as it makes heavy use of the Python
 ecosystem and especially Scikit-learn, Scipy and Statsmodels. Several functions are straightforward
-wrappers using this sources and are provided to the user for convenience purposes. The authors
+wrappers using these resources and are provided to the user for convenience purposes. The authors
 have taken great care to ensure that no part of this package contains proprietary code. 
 
 Main aim
