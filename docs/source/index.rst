@@ -29,7 +29,10 @@ About the package
 
 The main contributors started building their first statistical credit models back in 2003. Over the years, we have impemented similar set of test in several different financial institutions. 
 
-The source code has been developed specifically for this package from scratch.
+This package is standing on the shoulders of giants as it makes heavy use of the Python
+ecosystem and especially Scikit-learn, Scipy and Statsmodels. Several functions are straightforward
+wrappers using this sources and are provided to the user for convenience purposes. The authors
+have taken great care to ensure that no part of this package contains proprietary code. 
 
 Main aim
 -----------------
@@ -46,12 +49,13 @@ Main Features
   For the list of all tests, see Overview > List of tests
   
 
-Dependencies
-------------------------
+Full list of dependencies
+---------------------------
 - NumPy (https://www.numpy.org)
-- pandas (https://www.numpy.org)
-- statsmodels (https://www.numpy.org)
-- Scikit-learn (https://www.numpy.org)
+- Pandas (https://pandas.pydata.org/)
+- Statsmodels (https://www.statsmodels.org/)
+- Scikit-learn (https://scikit-learn.org/)
+- Scipy (https://scipy.org/)
 
 
 Getting Help

@@ -1,77 +1,69 @@
-import numpy as np
-import pandas as pd
-from scipy.stats import norm
+from scipy import stats
 
 
-def migration_matrix_stability(df, initial_ratings_col, final_ratings_col):
-    """z-tests to verify stability of transition matrices
+def spearman(array_1, array_2, alternative='two-sided'):
+    """
+    Calculate a Spearman correlation coefficient with associated p-value.
+
+    This is a wrapper around scipy.stats.spearmanr function.
+
+    The Spearman rank-order correlation coefficient is a nonparametric
+    measure of the monotonicity of the relationship between two datasets.
+    Unlike the Pearson correlation, the Spearman correlation does not
+    assume that both datasets are normally distributed. Like other
+    correlation coefficients, this one varies between -1 and +1 with 0
+    implying no correlation. Correlations of -1 or +1 imply an exact
+    monotonic relationship. Positive correlations imply that as x
+    increases, so does y. Negative correlations imply that as x increases,
+    y decreases.
+
+    The p-value roughly indicates the probability of an uncorrelated 
+    system producing datasets that have a Spearman correlation at least 
+    as extreme as the one computed from these datasets. The p-values 
+    are not entirely reliable but are probably reasonable for datasets 
+    larger than 500 or so.
+
 
     Parameters
     ----------
-    df: array-like, at least 2D
-        data
-    initial_ratings_col: string
-        name of column with initial ratings values
-    final_ratings_col: string
-        name of column with final ratings values
+    array_1 : pandas series
+        Series containing multiple observations 
+    array_2 : pandas series
+        Series containing multiple observations 
+    alternative : {'two-sided', 'less', 'greater'}, optional
+        Defines the alternative hypothesis. Default is 'two-sided'.
+        The following options are available:
+        * 'two-sided': the correlation is nonzero
+        * 'less': the correlation is negative (less than zero)
+        * 'greater':  the correlation is positive (greater than zero)
 
     Returns
     -------
-    z_df: array-like
-        z statistic for each ratings pair
-    phi_df: array-like
-        p-values for each ratings pair
+    correlation : float or ndarray (2-D square)
+        Spearman correlation matrix or correlation coefficient (if only 2
+        variables are given as parameters. Correlation matrix is square with
+        length equal to total number of variables (columns or rows) in ``a``
+        and ``b`` combined.
+    pvalue : float
+        The p-value for a hypothesis test whose null hypotheisis
+        is that two sets of data are uncorrelated. See `alternative` above
+        for alternative hypotheses. `pvalue` has the same
+        shape as `correlation`.
+ 
 
 
-    Notes
-    -----------
-    The Null hypothesis is that p_ij >= p_ij-1 or p_ij-1 >= p_ij
-    depending on whether the (ij) entry is below or above main diagonal
-
+    References
+    -------------
+        [1] Zwillinger, D. and Kokoska, S. (2000). CRC Standard
+        Probability and Statistics Tables and Formulae. Chapman & Hall: New
+        York. 2000.
+        Section  14.7
 
     Examples
     --------
-    .. code-block:: python
+    >>> spearmanr([1,2,3,4,5], [5,6,7,8,7])
+    SpearmanrResult(correlation=0.82078..., pvalue=0.08858...)
 
-        >>> res = migration_matrix_stability(df=df, initial_ratings_col='ratings', final_ratings_col='ratings2')
-        >>> print(res)
     """
-    a = df[initial_ratings_col]
-    b = df[final_ratings_col]
-    N_ij = pd.crosstab(a, b)
-    p_ij = pd.crosstab(a, b, normalize='index')
-    K = len(set(a))
-    z_df = p_ij.copy()
-    for i in range(1, K+1):
-        for j in range(1, K+1):
-            if i == j:
 
-                z_ij = np.nan
-
-            if i > j:
-                Ni = N_ij.sum(axis=1).values[i-1]
-
-                num = p_ij.iloc[i-1, j-1+1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1+1]*(1-p_ij.iloc[i-1, j-1+1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1+1]/Ni
-
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
-
-            elif i < j:
-                Ni = N_ij.sum(axis=1).values[i-1]
-
-                num = p_ij.iloc[i-1, j-1-1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1-1]*(1-p_ij.iloc[i-1, j-1-1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1-1]/Ni
-
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
-
-            else:
-
-                z_ij = np.nan
-
-            z_df.iloc[i-1, j-1] = z_ij
-    phi_df = z_df.apply(lambda x: x.apply(lambda y: norm.cdf(y)))
-    return z_df, phi_df
+    return stats.spearmanr(array_1, array_2, alternative='two-sided')
