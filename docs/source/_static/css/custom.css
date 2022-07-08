@@ -1,3 +1,7 @@
 .sig-prename.descclassname .pre {
     display: none;
 }
+
+li.wy-breadcrumbs-aside {
+    display: none;
+}
