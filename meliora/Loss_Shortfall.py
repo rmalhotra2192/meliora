@@ -3,75 +3,67 @@ import pandas as pd
 from scipy.stats import norm
 
 
-def migration_matrix_stability(df, initial_ratings_col, final_ratings_col):
-    """z-tests to verify stability of transition matrices
+def loss_shortfall(observed_lgd, elbe):
+
+    """ Difference between observed and estimated LGDs divided by observed LGDs weighted by EAD
+
+    https://essay.utwente.nl/61905/1/master_B._Maarse.pdf
+
+    The current rejection areas are set as a percentage. These do not take into account that
+    the LGD has a variance. If the variance of the observed loss is high the loss shortfall is
+    expected to deviate more than with a low variance, because the distribution of the loss at
+    default is broader. Bootstrapping with replacement confirmed this reasoning. Two
+    portfolios were used with the same loss shortfall, for low variance the 95 percent
+    bootstrapped confidence interval was [-0.05, -0.01] and for the high variance [-0.30,
+    0.14]6
+    . 
+    
+    This shows that the variance influence the LS and should be used when setting
+    the rejection area.
+    The variance of the LS is dependent on the variance of the observed losses. There is no
+    linear relation, therefore distribution of predicted LS is unknown. To take the variance
+    into account a distribution will be bootstrapped around the observed LS. This is done by
+    sampling with replacement N observations and calculate an observed LS. This is
+    repeated 1000 times to generate a distribution around the observed LS. The distribution
+    will be used to test whether the expected LS of zero is within a 95/99 percent confidence
+    interval of the observed LS.
+    The main advantage of bootstrapping is that no assumption has to be made on the
+    underlying distribution, therefore it is applicable in many cases. The main drawback is
+    the computation effort needed. Another drawback is that it tends to be optimistic about
+    the standard error, which results in a somewhat smaller confidence interval (Wehrens et
+    al., 2000). For backtesting this means that the confidence interval might be somewhat
+    conservative. 
+
+
 
     Parameters
     ----------
-    df: array-like, at least 2D
-        data
-    initial_ratings_col: string
-        name of column with initial ratings values
-    final_ratings_col: string
-        name of column with final ratings values
+    observed_lgd: pandas Series
+        realised LGD, float
+    elbe: pandas Series
+        ELBE for each facility, float
 
     Returns
     -------
-    z_df: array-like
-        z statistic for each ratings pair
-    phi_df: array-like
-        p-values for each ratings pair
-
-
-    Notes
-    -----------
-    The Null hypothesis is that p_ij >= p_ij-1 or p_ij-1 >= p_ij
-    depending on whether the (ij) entry is below or above main diagonal
+    t_stat: scalar
+        t-statistics
+    p_value: scalar
+        p-value
 
 
     Examples
     --------
-    .. code-block:: python
-
-        >>> res = migration_matrix_stability(df=df, initial_ratings_col='ratings', final_ratings_col='ratings2')
-        >>> print(res)
+    >>> from sklearn.metrics import accuracy_score
+    >>> y_pred = [0, 2, 1, 3]
+    >>> y_true = [0, 1, 2, 3]
+    >>> accuracy_score(y_true, y_pred)
+    0.5
+    >>> accuracy_score(y_true, y_pred, normalize=False)
+    2
+    In the multilabel case with binary label indicators:
+    >>> import numpy as np
+    >>> accuracy_score(np.array([[0, 1], [1, 1]]), np.ones((2, 2)))
+    0.5
     """
-    a = df[initial_ratings_col]
-    b = df[final_ratings_col]
-    N_ij = pd.crosstab(a, b)
-    p_ij = pd.crosstab(a, b, normalize='index')
-    K = len(set(a))
-    z_df = p_ij.copy()
-    for i in range(1, K+1):
-        for j in range(1, K+1):
-            if i == j:
 
-                z_ij = np.nan
-
-            if i > j:
-                Ni = N_ij.sum(axis=1).values[i-1]
-
-                num = p_ij.iloc[i-1, j-1+1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1+1]*(1-p_ij.iloc[i-1, j-1+1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1+1]/Ni
-
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
-
-            elif i < j:
-                Ni = N_ij.sum(axis=1).values[i-1]
-
-                num = p_ij.iloc[i-1, j-1-1] - p_ij.iloc[i-1, j-1]
-                den_a = p_ij.iloc[i-1, j-1]*(1-p_ij.iloc[i-1, j-1])/Ni
-                den_b = p_ij.iloc[i-1, j-1-1]*(1-p_ij.iloc[i-1, j-1-1])/Ni
-                den_c = 2*p_ij.iloc[i-1, j-1]*p_ij.iloc[i-1, j-1-1]/Ni
-
-                z_ij = num/np.sqrt(den_a + den_b + den_c)
-
-            else:
-
-                z_ij = np.nan
-
-            z_df.iloc[i-1, j-1] = z_ij
-    phi_df = z_df.apply(lambda x: x.apply(lambda y: norm.cdf(y)))
-    return z_df, phi_df
+    return 1

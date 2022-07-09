@@ -1,5 +1,6 @@
 from scipy import stats
 
+
 def somersd(array_1, array_2, alternative='two-sided'):
     """
     Calculates Somers' D, an asymmetric measure of ordinal association.
