@@ -20,9 +20,6 @@ def hosmer_lemeshow(ratings, default_flag, prob_default, alpha, chi_stat):
     confidence interval limits of the actual PD, then the model outcomes are
     consistent with the actual outcomes.
 
-    **Ask SAS how to reference them!**
-    https://documentation.sas.com/doc/en/mdlmgrcdc/14.2/mdlmgrug/n194xndt3b3y1pn1ufc0mqbsmht4.htm
-
 
     Parameters
     ----------
