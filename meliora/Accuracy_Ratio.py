@@ -1,7 +1,7 @@
 from sklearn.metrics import accuracy_score
 
 
-def accuracy_ratio(y_test, pred):
+def accuracy_ratio(y_test, pred, normalize=True, sample_weight=None):
     """Accuracy classification score.
 
     In multilabel classification, this function computes subset accuracy:
@@ -43,7 +43,7 @@ def accuracy_ratio(y_test, pred):
 
     Examples
     --------
-    >>> from sklearn.metrics import accuracy_score
+    >>> from meliora import accuracy_score
     >>> y_pred = [0, 2, 1, 3]
     >>> y_true = [0, 1, 2, 3]
     >>> accuracy_score(y_true, y_pred)
@@ -56,4 +56,6 @@ def accuracy_ratio(y_test, pred):
     0.5
     """
 
-    return accuracy_score(y_test, pred)
+    return accuracy_score(
+        y_test, pred, normalize=normalize, sample_weight=sample_weight
+    )
